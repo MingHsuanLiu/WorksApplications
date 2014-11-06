@@ -1,15 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.co.worksap.global;
 
 import java.util.NoSuchElementException;
 
 /**
- *
  * @author ming
+ * @version 1
+ * @date Tue Nov 4 19:10:04 PST 2014
  */
 /**
  * The Queue class represents an immutable first-in-first-out (FIFO) queue of
@@ -19,60 +15,13 @@ import java.util.NoSuchElementException;
  */
 public class ImmutableQueue<E> {
 
-    private static class ImmutableList<E> {
-
-	private final E front;
-	private final ImmutableList<E> end;
-	private int size;
-
-	private ImmutableList()
-	{
-	    this.front = null;
-	    this.end = null;
-	    this.size = 0;
-	}
-
-	private ImmutableList(E front, ImmutableList<E> end)
-	{
-	    this.front = front;
-	    this.end = end;
-	    this.size = end.size + 1;
-	}
-
-	public static ImmutableList emptyList()
-	{
-	    return new ImmutableList();
-	}
-
-	public ImmutableList<E> add(E elem)
-	{
-	    return new ImmutableList<>(elem, this);
-	}
-
-	public boolean isEmpty()
-	{
-	    return this.size == 0;
-	}
-
-	private ImmutableList<E> reverse()
-	{
-	    ImmutableList<E> revList = new ImmutableList<>();
-	    ImmutableList<E> tail = this;
-	    while (!tail.isEmpty())
-	    {
-		revList = revList.add(tail.front);
-		tail = tail.end;
-	    }
-	    return revList;
-	}
-    }
-
     private ImmutableList<E> head;
     private ImmutableList<E> tail;
 
     /**
      * requires default constructor.
      */
+    @SuppressWarnings ("unchecked")
     public ImmutableQueue()
     {
 	// modify this constructor if necessary, but do not remove default constructor
@@ -80,13 +29,20 @@ public class ImmutableQueue<E> {
 	this.tail = ImmutableList.emptyList();
     }
 
+    // add other constructors if necessary
+    /**
+     * Initialize both head and tail of ImmutableQueue to be the generic
+     * ImmutableList elements.
+     * <p>
+     * @param head
+     * @param tail
+     */
     public ImmutableQueue(ImmutableList<E> head, ImmutableList<E> tail)
     {
 	this.head = head;
 	this.tail = tail;
     }
 
-    // add other constructors if necessary
     /**
      * Returns the queue that adds an item into the tail of this queue without
      * modifying this queue.
@@ -124,6 +80,7 @@ public class ImmutableQueue<E> {
      * @return <p>
      * @throws java.util.NoSuchElementException
      */
+    @SuppressWarnings ("unchecked")
     public ImmutableQueue<E> dequeue()
     {
 	if (this.size() == 0)
@@ -133,11 +90,11 @@ public class ImmutableQueue<E> {
 
 	if (!this.tail.isEmpty())
 	{
-	    return new ImmutableQueue<>(this.head, this.tail.end);
+	    return new ImmutableQueue<>(this.head, this.tail.endNode);
 	}
 	else
 	{
-	    return new ImmutableQueue<>(ImmutableList.emptyList(), this.head.reverse().end);
+	    return new ImmutableQueue<>(ImmutableList.emptyList(), this.head.reverse().endNode);
 	}
 
     }
@@ -154,6 +111,7 @@ public class ImmutableQueue<E> {
      * @return <p>
      * @throws java.util.NoSuchElementException
      */
+    @SuppressWarnings ("unchecked")
     public E peek()
     {
 	if (this.size() == 0)
@@ -167,7 +125,7 @@ public class ImmutableQueue<E> {
 	    this.head = ImmutableList.emptyList();
 	}
 
-	return this.tail.front;
+	return this.tail.frontNode;
     }
 
     /**
@@ -177,6 +135,94 @@ public class ImmutableQueue<E> {
      */
     public int size()
     {
-	return this.head.size + this.tail.size;
+	return this.head.lstSize + this.tail.lstSize;
+    }
+
+    /**
+     * Inner helper ImmutableList class to be represent the generic elements of
+     * ImmutableQueue object.
+     * <p>
+     * @param <E>
+     */
+    private static class ImmutableList<E> {
+
+	private final E frontNode;
+	private final ImmutableList<E> endNode;
+	private final int lstSize;
+
+	/**
+	 * Default constructor.
+	 */
+	private ImmutableList()
+	{
+	    this.frontNode = null;
+	    this.endNode = null;
+	    this.lstSize = 0;
+	}
+
+	/**
+	 * The constructor that insert the generic object to the first
+	 * element(node) of the ImmutabList and append the original to be the
+	 * tail of generic ImmutableList object and increase the size of the
+	 * ImmutableList by one.
+	 * <p>
+	 * @param obj
+	 * @param tail
+	 */
+	private ImmutableList(E obj, ImmutableList<E> tail)
+	{
+	    this.frontNode = obj;
+	    this.endNode = tail;
+	    this.lstSize = 1 + tail.lstSize;
+	}
+
+	/**
+	 * Return the new ImmutableList and initialize to null.
+	 * <p>
+	 * @return
+	 */
+	public static ImmutableList emptyList()
+	{
+	    return new ImmutableList();
+	}
+
+	/**
+	 * Return the new ImmutableList object that with the new generic element
+	 * that insert into the first element of the new ImmutableList.
+	 * <p>
+	 * @param elem
+	 * <p>
+	 * @return
+	 */
+	public ImmutableList<E> add(E elem)
+	{
+	    return new ImmutableList<>(elem, this);
+	}
+
+	/**
+	 * Check if the ImmutableList object is empty or not.
+	 * <p>
+	 * @return true if the ImmutableList is empty. Otherwise, return false.
+	 */
+	public boolean isEmpty()
+	{
+	    return (this.lstSize == 0);
+	}
+
+	/**
+	 * Return the reverse of original generic ImmutableList object.
+	 */
+	@SuppressWarnings ("unchecked")
+	private ImmutableList<E> reverse()
+	{
+	    ImmutableList<E> revList = emptyList();
+	    ImmutableList<E> tail = this;
+	    while (!tail.isEmpty())
+	    {
+		revList = revList.add(tail.frontNode);
+		tail = tail.endNode;
+	    }
+	    return revList;
+	}
     }
 }
